@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-multimodule-deployment
+  namespace: ajprakash
+  labels:
+    app: springboot-multimodule-deployment
+spec:
+  replicas: 3
+  volumes:
+    - name: mongo-pv-storage
+      persistentVolumeClaim:
+        claimName: demo-vol1-claim-wsc
+  selector:
+    matchLabels:
+      app: springboot-multimodule
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: springboot-multimodule
+    spec:
+      containers:
+        - name: mongo-db
+          image: mongo
+          volumeMounts:
+            - mountPath: "/usr/local/mongo/data"
+              name: mongo-pv-storage
+
+        - name: mongo-service
+          image: ajprakash/springboot-mongo
+          args: [ "--spring.data.mongodb.database=user_db","--spring.data.mongodb.port=27017","--spring.data.mongodb.host=localhost" ]
+
+        - name: user-service
+          image: ajprakash/springboot-sampleapp
+          ports:
+            - containerPort: 8080
+          args: [ "--db.host=localhost", "--db.port=8102" ]

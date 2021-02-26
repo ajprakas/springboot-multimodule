@@ -1,0 +1,4 @@
+kubectl apply -f springboot-multimodule.yml
+kubectl get pod
+kubectl expose pod springboot-multimodule --type=NodePort --port=8080
+kubectl describe service springboot-multimodule # check value of NodePort and launch http://localhost:<NodePort>/users
